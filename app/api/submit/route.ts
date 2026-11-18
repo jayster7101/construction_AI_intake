@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const endpoint = process.env.FORMSPREE_ENDPOINT;
-  if (!endpoint || !/^https:\/\/formspree\.io\/f\/[a-z0-9]+$/i.test(endpoint)) {
+  const endpoint = process.env.FORMSPREE_ENDPOINT || "https://formspree.io/f/xaeoovko";
+  if (!/^https:\/\/formspree\.io\/f\/[a-z0-9]+$/i.test(endpoint)) {
     return NextResponse.json({ error: "Signup is currently unavailable." }, { status: 503 });
   }
 
