@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   const endpoint = process.env.FORMSPREE_ENDPOINT || "https://formspree.io/f/xaeoovko";
   if (!/^https:\/\/formspree\.io\/f\/[a-z0-9]+$/i.test(endpoint)) {
-    return NextResponse.json({ error: "Signup is currently unavailable." }, { status: 503 });
+    return NextResponse.json({ error: "Information requests are currently unavailable." }, { status: 503 });
   }
 
   const payload: unknown = await request.json().catch(() => null);
@@ -18,11 +18,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter your name and a valid email address." }, { status: 400 });
   }
 
+  const background = "background" in payload && typeof payload.background === "string"
+    ? payload.background.trim()
+    : "";
+  if (!background || background.length > 200) {
+    return NextResponse.json({ error: "Enter your background in 200 characters or fewer." }, { status: 400 });
+  }
+
   try {
     const result = await fetch(endpoint, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify({ name, email, background }),
       signal: AbortSignal.timeout(8000),
       redirect: "error",
     });
@@ -34,5 +41,5 @@ export async function POST(request: Request) {
   } catch {
     // Send a generic error so provider details stay on the server.
   }
-  return NextResponse.json({ error: "We couldn’t complete your signup. Please try again." }, { status: 502 });
+  return NextResponse.json({ error: "We couldn’t send your request. Please try again." }, { status: 502 });
 }

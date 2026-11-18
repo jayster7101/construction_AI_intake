@@ -15,13 +15,14 @@ export default function Home() {
     const fields = new FormData(form);
     const name = String(fields.get("name") ?? "").trim();
     const email = String(fields.get("email") ?? "").trim();
+    const background = String(fields.get("background") ?? "").trim();
     submitting.current = true;
     setStatus("pending");
     try {
       const response = await fetch("/api/submit", {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ name, email, background }),
         signal: AbortSignal.timeout(15000),
       });
 
@@ -30,7 +31,7 @@ export default function Home() {
         setStatus("success");
       } else {
         const body = await response.json().catch(() => null);
-        setError(body?.error || "We couldn’t complete your signup. Please try again.");
+        setError(body?.error || "We couldn’t send your request. Please try again.");
         setStatus("error");
       }
     } catch {
@@ -41,7 +42,7 @@ export default function Home() {
     }
   }
 
-  const message = status === "success" ? "You’re on the list. Thanks for signing up."
+  const message = status === "success" ? "Thanks for reaching out. We received your request."
     : status === "error" ? error : "";
 
   return (
@@ -50,9 +51,9 @@ export default function Home() {
         <div className="intro">
           <div className="mark" aria-hidden="true"><span /><span /><span /></div>
           <h1 id="page-title">Construction Rework prevention AI</h1>
-          <p>Sign up to hear when early access opens.</p>
+          <p>Developers and engineers, tell us about your background to learn more about the project.</p>
         </div>
-        <form onSubmit={submit} aria-label="Early access signup">
+        <form onSubmit={submit} aria-label="Project information request">
           <div className="field">
             <label htmlFor="name">Full name</label>
             <input id="name" name="name" autoComplete="name" placeholder="Jordan Lee" required maxLength={120} pattern=".*\S.*" />
@@ -61,8 +62,19 @@ export default function Home() {
             <label htmlFor="email">Email address</label>
             <input id="email" name="email" type="email" autoComplete="email" placeholder="jordan@example.com" required maxLength={254} />
           </div>
+          <div className="field">
+            <label htmlFor="background">Professional or academic background</label>
+            <input
+              id="background"
+              name="background"
+              placeholder="e.g. Computer science, civil engineering"
+              required
+              maxLength={200}
+              pattern={".*\\S.*"}
+            />
+          </div>
           <button type="submit" disabled={status === "pending"}>
-            {status === "pending" ? "Signing up…" : "Join the waitlist"}<span aria-hidden="true">↗</span>
+            {status === "pending" ? "Sending…" : "Request project info"}<span aria-hidden="true">↗</span>
           </button>
           <p className="status" role="status" data-state={status}>{message}</p>
         </form>
